@@ -49,7 +49,7 @@ int readmatrix(const char *filename, float *matrix){
 void calcmean(float *matrix, float *mean){
 	int i,j;
 	float sum;
-
+	#pragma omp parallel for
 	for(i = 0; i < H; i++){
 		sum = 0.0;
 		for(j = 0; j < W; j++){
@@ -63,6 +63,7 @@ void calc_mm_std(float *matrix, float *mean, float *mm, float *std){
 	int i,j;
 	float sum, diff;
 
+	#pragma omp parallel for
 	for(i = 0; i < H; i++){
 		sum = 0.0;
 		for(j = 0; j < W; j++){
@@ -86,7 +87,7 @@ void pearson(float *mm, float *std){
 			}
 			r = sum / (std[sample1] * std[sample2]);
 		}
-		printf("%d\n", sample1);
+		//printf("%d\n", sample1);
 	}
 }
 
