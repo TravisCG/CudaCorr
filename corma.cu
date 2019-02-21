@@ -33,10 +33,10 @@ int readmatrix(const char *filename, float *matrix){
 
 	while(getline(&line, &size, input) != -1){
 		token = strtok(line, "\t");
-		matrix[count] = atoi(token);
+		matrix[count] = atof(token);
 		count++;
 		while( (token = strtok(NULL, "\t")) != NULL){
-			matrix[count] = atoi(token);
+			matrix[count] = atof(token);
 			count++;
 		}
 	}
@@ -44,6 +44,10 @@ int readmatrix(const char *filename, float *matrix){
 	fclose(input);
 	free(line);
 	return(0);
+}
+
+__global__ void calcmean(float *matrix, float *mean){
+
 }
 
 void calcmean(float *matrix, float *mean){
@@ -83,7 +87,7 @@ __global__ void pearson(float *mm, float *std){
 		for(sample2 = sample1+1; sample2 < H; sample2++){
 			sum = 0.0;
 			for(i = 0; i < W; i++){
-				sum += mm[sample1] * mm[sample2];
+				sum += mm[sample1 * W + i] * mm[sample2 * W + i];
 			}
 			r = sum / (std[sample1] * std[sample2]);
 		}
