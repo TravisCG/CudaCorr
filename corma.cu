@@ -47,10 +47,16 @@ int readmatrix(const char *filename, float *matrix){
 }
 
 __global__ void calcmean(float *matrix, float *mean){
+	int i = threadIdx.x;
+	float sum = 0.0;
 
+	for(int j = 0; j < W; j++){
+		sum += matrix[i * W + j];
+	}
+	mean[i] = sum / (float)W;
 }
 
-void calcmean(float *matrix, float *mean){
+void calcmeancpu(float *matrix, float *mean){
 	int i,j;
 	float sum;
 
@@ -96,7 +102,7 @@ __global__ void pearson(float *mm, float *std){
 }
 
 int main(int argc, char **argv){
-	float *matrix, *minusmean, *mean, *std;
+	float *matrix, *minusmean, *meancpu, *meangpu, *std;
 
 	cudaMallocManaged(&matrix, sizeof(float) * W * H);
 
@@ -109,9 +115,10 @@ int main(int argc, char **argv){
 		return(1);
 	}
 
-	cudaMallocManaged(&mean, sizeof(float) * H);
+	cudaMallocManaged(&meangpu, sizeof(float) * H);
+	cudaMallocManaged(&meancpu, sizeof(float) * H);
 	cudaMallocManaged(&std, sizeof(float) * H);
-	if(mean == NULL || std == NULL){
+	if(meangpu == NULL || std == NULL || meancpu == NULL){
 		return(1);
 	}
 
@@ -120,12 +127,17 @@ int main(int argc, char **argv){
 	}
 	else{
 		readmatrix(argv[1], matrix);
-		calcmean(matrix, mean);
+		calcmean<<<1, H>>>(matrix, meangpu);
+		//calcmeancpu(matrix, meancpu);
+		for(int i = 0; i < H; i++){
+			//printf("%f %f\n", meancpu[i], meangpu[i]);
+		}
 		//calc_mm_std(matrix, mean, minusmean, std);
 		//pearson(minusmean, std);
 	}
 
-	cudaFree(mean);
+	cudaFree(meangpu);
+	cudaFree(meancpu);
 	cudaFree(std);
 	cudaFree(matrix);
 	cudaFree(minusmean);
