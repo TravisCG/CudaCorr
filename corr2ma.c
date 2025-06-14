@@ -83,7 +83,7 @@ int readmatrix(const char *filename, float *matrix, char **id){
 void calcmean(float *matrix, float *mean, unsigned int W, unsigned int H){
 	unsigned int i,j;
 	float sum;
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for(i = 0; i < H; i++){
 		sum = 0.0;
 		for(j = 0; j < W; j++){
@@ -100,7 +100,7 @@ void calc_mm_std(float *matrix, float *mean, float *mm, float *std, unsigned int
 	unsigned int i,j;
 	float sum, diff;
 
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for(i = 0; i < H; i++){
 		sum = 0.0;
 		for(j = 0; j < W; j++){
@@ -112,10 +112,10 @@ void calc_mm_std(float *matrix, float *mean, float *mm, float *std, unsigned int
 	}
 }
 
-void pearson(float *mm1, float *mm2, float *std1, float *std2, unsigned int W, unsigned int H1, unsigned int H2, char **id1, char **id2){
+void pearson(float *mm1, float *mm2, float *std1, float *std2, unsigned int W, unsigned int H1, unsigned int H2, char **id1, char **id2, float *matrix1, float *matrix2){
 	unsigned int i, sample1, sample2;
 	float sum,r;
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for(sample1 = 0; sample1 < H1; sample1++){
 		for(sample2 = 0; sample2 < H2; sample2++){
 			sum = 0.0;
@@ -123,6 +123,14 @@ void pearson(float *mm1, float *mm2, float *std1, float *std2, unsigned int W, u
 				sum += mm1[sample1 * W + i] * mm2[sample2 * W + i];
 			}
 			r = sum / (std1[sample1] * std2[sample2]);
+			if(r > 1.0 || r < -1.0){
+				printf("++++++++++++++++++++++++++++\n");
+				printf("%s %s %d %d %f %f %f\n", id1[sample1], id2[sample2], sample1+1, sample2+1, std1[sample1], std2[sample2], r);
+				for(unsigned int j = 0; j < W; j++){
+					printf("%f %f\n", matrix1[sample1 * W + j], matrix2[sample2 * W + j]);
+				}
+				printf("++++++++++++++++++++++++++++\n");
+			}
 			printf("%s\t%s\t%d\t%d\t%f\n", id1[sample1], id2[sample2], sample1, sample2, r);
 		}
 	}
@@ -203,7 +211,7 @@ void twomatrixcorr(char *file1, unsigned int h1, char *file2, unsigned int h2, u
 	}
 	calc_mm_std(matrix2, mean2, mm2, std2, width, h2);
 
-	pearson(mm1, mm2, std1, std2, width, h1, h2, id1, id2);
+	pearson(mm1, mm2, std1, std2, width, h1, h2, id1, id2, matrix1, matrix2);
 
 	free(matrix1);
 	free(matrix2);
