@@ -63,8 +63,9 @@ int readmatrix(const char *filename, float *matrix, char **id){
 	while(getline(&line, &size, input) != -1){
 		token = strtok(line, "\t");
 		n = strlen(token);
-		id[idcount] = malloc(sizeof(char) * n + 1);
+		id[idcount] = malloc(sizeof(char) * n);
 		strncpy(id[idcount], token, n);
+		id[idcount][n] = '\0';
 		idcount++;
 		while( (token = strtok(NULL, "\t")) != NULL){
 			matrix[count] = atof(token);
@@ -250,37 +251,5 @@ int main(int argc, char **argv){
 			twomatrixcorr(argv[1], h1, argv[2], h2, w1);
 		}
 	}
-/*
-	matrix = malloc(sizeof(float) * W * H);
-
-	if(matrix == NULL){
-		return(1);
-	}
-
-	minusmean = malloc(sizeof(float) * W * H);
-	if(minusmean == NULL){
-		return(1);
-	}
-
-	mean = malloc(sizeof(float) * H);
-	std  = malloc(sizeof(float) * H);
-	if(mean == NULL || std == NULL){
-		return(1);
-	}
-
-	*fillrandom(matrix);*TODO later change it to file loader*
-	if(argc != 2){
-		printf("Missing matrix file\n");
-	}
-	else{
-		readmatrix(argv[1], matrix);
-		calcmean(matrix, mean);
-		calc_mm_std(matrix, mean, minusmean, std);
-		pearson(minusmean, std);
-	}
-	free(mean);
-	free(std);
-	free(matrix);
-	free(minusmean);*/
 	return(EXIT_SUCCESS);
 }
